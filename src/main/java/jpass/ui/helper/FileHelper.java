@@ -225,8 +225,11 @@ public final class FileHelper {
                 return;
             }
         } else {
+            
             password = parent.getModel().getPassword();
+            
         }
+        
         Worker worker = new Worker(parent) {
             @Override
             protected Void doInBackground() throws Exception {
@@ -256,6 +259,28 @@ public final class FileHelper {
         worker.execute();
     }
 
+    public static String byteToHex(byte data) {
+        StringBuilder buf = new StringBuilder();
+        buf.append(toHexChar((data >>> 4) & 0x0F));
+        buf.append(toHexChar(data & 0x0F));
+        return buf.toString();
+    }
+    public static char toHexChar(int i) {
+        if ((0 <= i) && (i <= 9)) {
+            return (char) ('0' + i);
+        } else {
+            return (char) ('a' + (i - 10));
+        }
+    }
+
+    public static String bytesToHex(byte[] data) {
+        StringBuilder buf = new StringBuilder();
+        for (int i = 0; i < data.length; i++) {
+            buf.append(byteToHex(data[i]));
+            buf.append(" ");
+        }
+        return (buf.toString());
+    }
     /**
      * Shows a filechooser dialog and opens a file.
      *

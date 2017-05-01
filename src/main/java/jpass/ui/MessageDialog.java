@@ -273,6 +273,10 @@ public final class MessageDialog extends JDialog implements ActionListener {
             }
         }
 
+        
+        System.out.println("PIN: "+password.getPassword());
+        
+        // here we get the pin, send it to the javacard, then receive the key and encrypt it, finally send it back
         byte[] passwordHash = null;
         try {
             passwordHash = CryptUtils.getPKCS5Sha256Hash(password.getPassword());
