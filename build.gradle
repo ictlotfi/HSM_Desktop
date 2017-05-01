@@ -1,0 +1,28 @@
+apply plugin: 'java'
+
+compileJava.options.encoding = 'UTF-8'
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.11'
+}
+
+jar {
+    baseName = 'jpass'
+    version = '0.1.15-SNAPSHOT'
+    manifest {
+        attributes('Main-Class': 'jpass.JPass')
+    }
+}
+
+task copyConfig(type: Copy) {
+    from 'src/main/config'
+    into 'build/libs'
+}
+
+build.dependsOn copyConfig
