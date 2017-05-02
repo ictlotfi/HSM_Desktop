@@ -32,6 +32,8 @@ package jpass.ui.helper;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
@@ -60,7 +62,7 @@ public final class FileHelper {
      *
      * @param parent parent component
      */
-    public static void createNew(final JPassFrame parent) {
+    public static void createNew(final JPassFrame parent) throws Exception {
         if (parent.getModel().isModified()) {
             int option = MessageDialog.showQuestionMessage(
                     parent,
@@ -123,7 +125,7 @@ public final class FileHelper {
      *
      * @param parent parent component
      */
-    public static void importFile(final JPassFrame parent) {
+    public static void importFile(final JPassFrame parent) throws Exception {
         File file = showFileChooser(parent, "Import", "xml", "XML Files (*.xml)");
         if (file == null) {
             return;
@@ -183,7 +185,7 @@ public final class FileHelper {
      * @param parent parent component
      * @param saveAs normal 'Save' dialog or 'Save as'
      */
-    public static void saveFile(final JPassFrame parent, final boolean saveAs) {
+    public static void saveFile(final JPassFrame parent, final boolean saveAs) throws Exception {
         saveFile(parent, saveAs, new Callback() {
             @Override
             public void call(boolean result) {
@@ -200,7 +202,7 @@ public final class FileHelper {
      * @param callback callback function with the result; the result is
      *         {@code true} if the file successfully saved; otherwise {@code false}
      */
-    public static void saveFile(final JPassFrame parent, final boolean saveAs, final Callback callback) {
+    public static void saveFile(final JPassFrame parent, final boolean saveAs, final Callback callback) throws Exception {
         final String fileName;
         if (saveAs || parent.getModel().getFileName() == null) {
             File file = showFileChooser(parent, "Save", "jpass", "JPass Data Files (*.jpass)");
@@ -286,7 +288,7 @@ public final class FileHelper {
      *
      * @param parent parent component
      */
-    public static void openFile(final JPassFrame parent) {
+    public static void openFile(final JPassFrame parent) throws Exception {
         final File file = showFileChooser(parent, "Open", "jpass", "JPass Data Files (*.jpass)");
         if (file == null) {
             return;
@@ -302,7 +304,11 @@ public final class FileHelper {
                     @Override
                     public void call(boolean result) {
                         if (result) {
-                            doOpenFile(file.getPath(), parent);
+                            try {
+                                doOpenFile(file.getPath(), parent);
+                            } catch (Exception ex) {
+                                Logger.getLogger(FileHelper.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
                     }
                 });
@@ -320,7 +326,7 @@ public final class FileHelper {
      * @param fileName file name
      * @param parent parent component
      */
-    public static void doOpenFile(final String fileName, final JPassFrame parent) {
+    public static void doOpenFile(final String fileName, final JPassFrame parent) throws Exception {
         parent.getModel().clear();
         if (fileName == null) {
             return;

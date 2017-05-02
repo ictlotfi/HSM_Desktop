@@ -32,6 +32,8 @@ package jpass.ui.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -57,7 +59,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = -8823457568905830188L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            FileHelper.createNew(JPassFrame.getInstance());
+            try {
+                FileHelper.createNew(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -65,7 +71,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = -441032579227887886L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            FileHelper.openFile(JPassFrame.getInstance());
+            try {
+                FileHelper.openFile(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -73,7 +83,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = 8657273941022043906L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            FileHelper.saveFile(JPassFrame.getInstance(), false);
+            try {
+                FileHelper.saveFile(JPassFrame.getInstance(), false);
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -81,7 +95,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = 1768189708479045321L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            FileHelper.saveFile(JPassFrame.getInstance(), true);
+            try {
+                FileHelper.saveFile(JPassFrame.getInstance(), true);
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -97,7 +115,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = -1331441499101116570L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            FileHelper.importFile(JPassFrame.getInstance());
+            try {
+                FileHelper.importFile(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -106,7 +128,12 @@ public enum MenuActionType {
         @Override
         public void actionPerformed(ActionEvent ev) {
             JPassFrame parent = JPassFrame.getInstance();
-            byte[] password = MessageDialog.showPasswordDialog(parent, true);
+            byte[] password = null;
+            try {
+                password = MessageDialog.showPasswordDialog(parent, true);
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
             if (password == null) {
                 MessageDialog.showInformationMessage(parent, "Password has not been modified.");
             } else {

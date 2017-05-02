@@ -29,6 +29,7 @@
 
 package jpass.ui;
 
+import applets.MyAPDU;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -80,6 +81,7 @@ public final class MessageDialog extends JDialog implements ActionListener {
     public static final int NO_OPTION = 1;
     public static final int CANCEL_OPTION = 2;
     public static final int CLOSED_OPTION = -1;
+    private static MyAPDU m_apdu = new MyAPDU();
 
     private int selectedOption;
 
@@ -237,34 +239,35 @@ public final class MessageDialog extends JDialog implements ActionListener {
     }
 
     /**
-     * Shows a password dialog.
+     * Shows a m_pin dialog.
      *
      * @param parent parent component
-     * @param confirm password confirmation
-     * @return the password
+     * @param confirm m_pin confirmation
+     * @return the m_pin
      */
-    public static byte[] showPasswordDialog(final Component parent, final boolean confirm) {
+    public static byte[] showPasswordDialog(final Component parent, final boolean confirm) throws Exception {
         JPanel panel = new JPanel();
-        panel.add(new JLabel("Password:"));
-        final JPasswordField password = TextComponentFactory.newPasswordField();
-        panel.add(password);
-        JPasswordField repeat = null;
+        panel.add(new JLabel("PIN:"));
+        final JPasswordField m_pin = TextComponentFactory.newPasswordField();
+        panel.add(m_pin);
+        JPasswordField repeat_pin = null;
         if (confirm) {
-            repeat = TextComponentFactory.newPasswordField();
+            repeat_pin = TextComponentFactory.newPasswordField();
             panel.add(new JLabel("Repeat:"));
-            panel.add(repeat);
+            panel.add(repeat_pin);
         }
         panel.setLayout(new SpringLayout());
         SpringUtilities.makeCompactGrid(panel, confirm ? 2 : 1, 2, 5, 5, 5, 5);
         boolean notCorrect = true;
 
         while (notCorrect) {
-            int option = showMessageDialog(parent, panel, "Enter Password", getIcon("dialog_lock"), OK_CANCEL_OPTION);
+            int option = showMessageDialog(parent, panel, "Enter PIN", getIcon("dialog_lock"), OK_CANCEL_OPTION);
             if (option == OK_OPTION) {
-                if (password.getPassword().length == 0) {
-                    showWarningMessage(parent, "Please enter a password.");
-                } else if (confirm && !Arrays.equals(password.getPassword(), repeat.getPassword())) {
-                    showWarningMessage(parent, "Password and repeated password are not identical.");
+                System.out.println("PIN: "+m_pin.getPassword()[0]);
+                if (m_pin.getPassword().length != 4 || !isNumeric(m_pin.getPassword())) {
+                    showWarningMessage(parent, "Please enter a valid PIN.");
+                } else if (confirm && !Arrays.equals(m_pin.getPassword(), repeat_pin.getPassword())) {
+                    showWarningMessage(parent, "PIN and repeated PIN are not identical.");
                 } else {
                     notCorrect = false;
                 }
@@ -273,18 +276,54 @@ public final class MessageDialog extends JDialog implements ActionListener {
             }
         }
 
+        // Now we are sure that we have a valid PIN of 4 digits
+        System.out.println("PIN: "+m_pin.getPassword()[0]);
         
-        System.out.println("PIN: "+password.getPassword());
+        char[] pin_array = m_pin.getPassword();
         
+        
+/*SIMULATION CODE--------------------------------------------------------------------******************/        
+        m_apdu.executeRun(); // Change the card State to SETUP state
+        /*if (!confirm) {// new file
+            m_apdu.setPin((byte) pin_array[0], (byte) pin_array[1], 
+                (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to NORMAL state
+            }
+        else { // verify PIN
+            
+        }*/
+        
+        m_apdu.setPin((byte) pin_array[0], (byte) pin_array[1], 
+                (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to NORMAL state
+        
+        m_apdu.verifyPin((byte) pin_array[0], (byte) pin_array[1], 
+                (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to AUTHORIZED state
+        
+        String key = m_apdu.getKey();
+        
+        if (key.equals("-1")) {
+            showWarningMessage(parent, "Error getting Key.");
+        }
         // here we get the pin, send it to the javacard, then receive the key and encrypt it, finally send it back
         byte[] passwordHash = null;
         try {
-            passwordHash = CryptUtils.getPKCS5Sha256Hash(password.getPassword());
+            passwordHash = CryptUtils.getPKCS5Sha256Hash(key.toCharArray());
         } catch (Exception e) {
             showErrorMessage(parent,
                     "Cannot generate password hash:\n" + StringUtils.stripString(e.getMessage()) + "\n\nOpening and saving files are not possible!");
         }
         return passwordHash;
+    }
+    
+    private static boolean isNumeric(char[] array){
+        try{
+            String str = new String(array);
+            int num = Integer.parseInt(str);
+            return num > 0;
+            // is an integer!
+          } catch (NumberFormatException e) {
+            // not an integer!
+            return false;
+          }
     }
 
     /**

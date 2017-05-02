@@ -16,6 +16,11 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>1</groupId>
+      <artifactId>2</artifactId>
+      <version>1</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

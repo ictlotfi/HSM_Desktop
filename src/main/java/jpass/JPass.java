@@ -29,6 +29,9 @@
 
 package jpass;
 
+import applets.MyAPDU;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
@@ -47,8 +50,10 @@ import jpass.util.Configuration;
 public class JPass {
     private static final String METAL_LOOK_AND_FEEL = "javax.swing.plaf.metal.MetalLookAndFeel";
 
+    
     public static void main(final String[] args) {
         try {
+            
             String lookAndFeel;
             if (Configuration.getInstance().is("system.look.and.feel.enabled", false)) {
                 lookAndFeel = UIManager.getSystemLookAndFeelClassName();
@@ -107,7 +112,11 @@ public class JPass {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                JPassFrame.getInstance((args.length > 0) ? args[0] : null);
+                try {
+                    JPassFrame.getInstance((args.length > 0) ? args[0] : null);
+                } catch (Exception ex) {
+                    Logger.getLogger(JPass.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }

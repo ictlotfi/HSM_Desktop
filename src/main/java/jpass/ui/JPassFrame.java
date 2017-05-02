@@ -92,7 +92,7 @@ public final class JPassFrame extends JFrame {
     private final IconStorage iconStorage = IconStorage.newInstance();
     private volatile boolean processing = false;
 
-    private JPassFrame(String fileName) {
+    private JPassFrame(String fileName) throws Exception {
         try {
             setIconImage(MessageDialog.getIcon("lock").getImage());
         } catch (Exception e) {
@@ -216,11 +216,11 @@ public final class JPassFrame extends JFrame {
         this.entryTitleList.requestFocusInWindow();
     }
 
-    public static JPassFrame getInstance() {
+    public static JPassFrame getInstance() throws Exception {
         return getInstance(null);
     }
 
-    public static JPassFrame getInstance(String fileName) {
+    public static JPassFrame getInstance(String fileName) throws Exception {
         if (INSTANCE == null) {
             synchronized (JPassFrame.class) {
                 if (INSTANCE == null) {
@@ -296,7 +296,7 @@ public final class JPassFrame extends JFrame {
     /**
      * Exits the application.
      */
-    public void exitFrame() {
+    public void exitFrame() throws Exception {
         if (Configuration.getInstance().is("clear.clipboard.on.exit.enabled", false)) {
             EntryHelper.copyEntryField(this, null);
         }
