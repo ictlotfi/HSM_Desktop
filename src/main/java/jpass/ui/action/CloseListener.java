@@ -31,6 +31,8 @@ package jpass.ui.action;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jpass.ui.JPassFrame;
 
@@ -50,7 +52,11 @@ public class CloseListener extends WindowAdapter {
     @Override
     public void windowClosing(WindowEvent event) {
         if (event.getSource() instanceof JPassFrame) {
-            ((JPassFrame) event.getSource()).exitFrame();
+            try {
+                ((JPassFrame) event.getSource()).exitFrame();
+            } catch (Exception ex) {
+                Logger.getLogger(CloseListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 }

@@ -44,6 +44,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -81,7 +83,7 @@ public final class MessageDialog extends JDialog implements ActionListener {
     public static final int NO_OPTION = 1;
     public static final int CANCEL_OPTION = 2;
     public static final int CLOSED_OPTION = -1;
-    private static MyAPDU m_apdu = new MyAPDU();
+    private static MyAPDU m_apdu;
 
     private int selectedOption;
 
@@ -101,6 +103,11 @@ public final class MessageDialog extends JDialog implements ActionListener {
         setTitle(title);
         this.selectedOption = CLOSED_OPTION;
 
+        try {
+            m_apdu = new MyAPDU();
+        } catch (Exception ex) {
+            Logger.getLogger(MessageDialog.class.getName()).log(Level.SEVERE, null, ex);
+        }
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 5));
         JButton defaultButton;
         switch (optionType) {
@@ -283,23 +290,53 @@ public final class MessageDialog extends JDialog implements ActionListener {
         
         
 /*SIMULATION CODE--------------------------------------------------------------------******************/        
-        m_apdu.executeRun(); // Change the card State to SETUP state
+       // m_apdu.executeRun(); // Change the card State to SETUP state
         /*if (!confirm) {// new file
-            m_apdu.setPin((byte) pin_array[0], (byte) pin_array[1], 
+            m_apdu.verifyPin((byte) pin_array[0], (byte) pin_array[1], 
                 (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to NORMAL state
             }
         else { // verify PIN
-            
+            m_apdu.verifyPin((byte) pin_array[0], (byte) pin_array[1], 
+                (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to AUTHORIZED stat
         }*/
         
-        m_apdu.setPin((byte) pin_array[0], (byte) pin_array[1], 
+       /* m_apdu.setPin((byte) pin_array[0], (byte) pin_array[1], 
                 (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to NORMAL state
+        */
+       String key = "-1";
+       
+       
+       System.out.println("pin_array[0]=> "+Character.getNumericValue(pin_array[0]));
+       System.out.println("pin_araaray[0]=> "+pin_array[1]);
+       System.out.println("pin_array[0]=> "+pin_array[2]);
+       System.out.println("pin_arraaay[0]=> "+Character.getNumericValue(pin_array[3]));
+       
+       
+        int result = m_apdu.verifyPin(Character.getNumericValue(pin_array[0]),  Character.getNumericValue(pin_array[1]), 
+                Character.getNumericValue(pin_array[2]), Character.getNumericValue(pin_array[3])); // Change the card State to AUTHORIZED state
         
-        m_apdu.verifyPin((byte) pin_array[0], (byte) pin_array[1], 
-                (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to AUTHORIZED state
+        switch (result) {
+          
+            case -1:
+                key = m_apdu.getKey();
+                if (key.equals("-1")) {
+                    showWarningMessage(parent, "bad PIN.");
+                }
+                break;
+            case -2:                
+                key = m_apdu.getKey();
+                if (key.equals("-1")) {
+                    showWarningMessage(parent, "invalid operation.");
+                }
+                break;
+            case -3:
+                showWarningMessage(parent, "Locked.");
+                break;
+            default:
+                break;
+        }
         
-        String key = m_apdu.getKey();
-        
+        key = m_apdu.getKey();
         if (key.equals("-1")) {
             showWarningMessage(parent, "Error getting Key.");
         }

@@ -32,6 +32,8 @@ package jpass.ui.action;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JList;
 import javax.swing.SwingUtilities;
@@ -54,11 +56,19 @@ public class ListListener extends MouseAdapter {
      */
     @Override
     public void mouseClicked(MouseEvent evt) {
-        if (JPassFrame.getInstance().isProcessing()) {
-            return;
+        try {
+            if (JPassFrame.getInstance().isProcessing()) {
+                return;
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(ListListener.class.getName()).log(Level.SEVERE, null, ex);
         }
         if (SwingUtilities.isLeftMouseButton(evt) && evt.getClickCount() == 2) {
-            EntryHelper.editEntry(JPassFrame.getInstance());
+            try {
+                EntryHelper.editEntry(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(ListListener.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 
@@ -69,7 +79,11 @@ public class ListListener extends MouseAdapter {
      */
     @Override
     public void mousePressed(MouseEvent evt) {
-        checkPopup(evt);
+        try {
+            checkPopup(evt);
+        } catch (Exception ex) {
+            Logger.getLogger(ListListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -79,7 +93,11 @@ public class ListListener extends MouseAdapter {
      */
     @Override
     public void mouseReleased(MouseEvent evt) {
-        checkPopup(evt);
+        try {
+            checkPopup(evt);
+        } catch (Exception ex) {
+            Logger.getLogger(ListListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -87,7 +105,7 @@ public class ListListener extends MouseAdapter {
      *
      * @param evt mouse event
      */
-    private void checkPopup(MouseEvent evt) {
+    private void checkPopup(MouseEvent evt) throws Exception {
         if (JPassFrame.getInstance().isProcessing()) {
             return;
         }

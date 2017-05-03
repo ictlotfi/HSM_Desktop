@@ -11,6 +11,8 @@ import javax.smartcardio.*;
  * @author Ismail
  */
 public class CardMngr {
+
+    
     CardTerminal m_terminal = null;
     CardChannel m_channel = null;
     Card m_card = null;
@@ -178,6 +180,12 @@ public class CardMngr {
         return (buf.toString());
     }
     
+    
+    static String bytesToHex(ResponseAPDU response) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        return bytesToHex(response.getData());
+    }
     
     public boolean prepareLocalSimulatorApplet(byte[] appletAIDArray, byte[] installData, Class appletClass) {
         System.setProperty("com.licel.jcardsim.terminal.type", "2");

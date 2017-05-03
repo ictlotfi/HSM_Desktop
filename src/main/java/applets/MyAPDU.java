@@ -5,6 +5,8 @@
  */
 package applets;
 
+import javax.smartcardio.ResponseAPDU;
+
 /**
  *
  * @author ismail
@@ -15,7 +17,7 @@ public class MyAPDU {
     static CardMngr cardManager = new CardMngr();
     
     
-    public MyAPDU (){
+    public MyAPDU () throws Exception{
         // Start Connection
             byte[] installData = new byte[13]; // no special install data passed now - can be used to pass initial keys etc.
             installData[0] = (byte) 0;
@@ -33,8 +35,12 @@ public class MyAPDU {
             installData[11] = (byte) 1;
             installData[12] = (byte) 1;
             System.out.println("succ=> 1");
-            cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, SimpleApplet.class);
-             System.out.println("succ=> 2");
+            //cardManager.prepareLocalSimulatorApplet(APPLET_AID, installData, SimpleApplet.class);
+            // System.out.println("succ=> 2");
+            
+            if(cardManager.ConnectToCard()){
+                System.out.println("succ=> ConnectToCard");
+            }
     }
     
     public String getKey() throws Exception{
@@ -46,21 +52,15 @@ public class MyAPDU {
             apdu[CardMngr.OFFSET_P2] = (byte) 0x00;
             apdu[CardMngr.OFFSET_LC] = (byte) additionalDataLen;
             
-            byte[] response = cardManager.sendAPDUSimulator(apdu); 
+            ResponseAPDU response = cardManager.sendAPDU(apdu); 
             String result = CardMngr.bytesToHex(response);
         
             System.out.println("result of getKey=> "+result);
             
-            if (result.endsWith("9000")){
-                
-                // get the final key
-                result = result.substring(0, 64);
-                //System.out.println("succ=> "+result);
+            if (response.getSW() != 0x9000){
+                result =  "-1";
             }
-            else{
-                //System.out.println("fail");
-                result = "-1";
-            }
+          
         
         return result;
     }
@@ -75,14 +75,14 @@ public class MyAPDU {
             apdu[CardMngr.OFFSET_P2] = (byte) 0x00;
             apdu[CardMngr.OFFSET_LC] = (byte) additionalDataLen;
             
-            byte[] response = cardManager.sendAPDUSimulator(apdu); 
+            ResponseAPDU response = cardManager.sendAPDU(apdu); 
             String result = CardMngr.bytesToHex(response);
         
             System.out.println("result of run=> "+result);
         
     }
     
-    public void setPin(byte a, byte b, byte c, byte d) throws Exception{
+    public boolean setPin(byte a, byte b, byte c, byte d) throws Exception{
         short additionalDataLen = 4;
         byte apdu[] = new byte[CardMngr.HEADER_LENGTH + additionalDataLen];
         apdu[CardMngr.OFFSET_CLA] = (byte) 0xB0;
@@ -96,13 +96,15 @@ public class MyAPDU {
         apdu[CardMngr.OFFSET_DATA+1] = b;
         apdu[CardMngr.OFFSET_DATA+2] = c;
         apdu[CardMngr.OFFSET_DATA+3] = d;
-        byte[] response = cardManager.sendAPDUSimulator(apdu); 
+        ResponseAPDU response = cardManager.sendAPDU(apdu); 
         String result = CardMngr.bytesToHex(response);
 
         System.out.println("result of setPin=> "+result);
+        
+        return response.getSW() == 0x9000;
     }
     
-    public void verifyPin(byte a, byte b, byte c, byte d) throws Exception{
+    public int verifyPin(int a, int b, int c, int d) throws Exception{
         short additionalDataLen = 4;
         byte apdu[] = new byte[CardMngr.HEADER_LENGTH + additionalDataLen];
         apdu[CardMngr.OFFSET_CLA] = (byte) 0xB0;
@@ -112,17 +114,29 @@ public class MyAPDU {
         apdu[CardMngr.OFFSET_LC] = (byte) additionalDataLen;
 
         
-        apdu[CardMngr.OFFSET_DATA] = a;
-        apdu[CardMngr.OFFSET_DATA+1] = b;
-        apdu[CardMngr.OFFSET_DATA+2] = c;
-        apdu[CardMngr.OFFSET_DATA+3] = d;
-        byte[] response = cardManager.sendAPDUSimulator(apdu); 
+        apdu[CardMngr.OFFSET_DATA] = (byte)a;
+        apdu[CardMngr.OFFSET_DATA+1] = (byte)b;
+        apdu[CardMngr.OFFSET_DATA+2] = (byte)c;
+        apdu[CardMngr.OFFSET_DATA+3] = (byte)d;
+        ResponseAPDU response = cardManager.sendAPDU(apdu); 
         String result = CardMngr.bytesToHex(response);
 
         System.out.println("result of verifyPin=> "+result);
+        
+
+        switch (response.getSW()) {
+            case 0x9000:
+                return 1;
+            case 0x6900:
+                return -1; // bad PIN
+            case 0x6680:
+                return -2; // invalid operation
+            default:
+                return -3; // locked
+        }
     }
     
-    public void verifyPuk(byte[] array) throws Exception{
+    public int verifyPuk(byte[] array) throws Exception{
         short additionalDataLen = 10;
         byte apdu[] = new byte[CardMngr.HEADER_LENGTH + additionalDataLen];
         apdu[CardMngr.OFFSET_CLA] = (byte) 0xB0;
@@ -144,9 +158,20 @@ public class MyAPDU {
         apdu[CardMngr.OFFSET_DATA+9] = array[9];
         
         
-        byte[] response = cardManager.sendAPDUSimulator(apdu); 
+        ResponseAPDU response = cardManager.sendAPDU(apdu); 
         String result = CardMngr.bytesToHex(response);
 
         System.out.println("result of verifyPuk=> "+result);
+        
+        switch (response.getSW()) {
+            case 0x9000:
+                return 1;
+            case 0x6900:
+                return -1; // bad PUK
+            case 0x6680:
+                return -2; // invalid operation
+            default:
+                return -3; // locked
+        }
     }
 }

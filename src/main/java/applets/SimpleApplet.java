@@ -105,7 +105,7 @@ public class SimpleApplet extends javacard.framework.Applet
         System.out.println("//////////////");
         System.out.println(lData);
         System.out.println(PUK_LENGTH);*/
-        if (lData == PUK_LENGTH) {        
+        //if (lData == PUK_LENGTH) {        
             m_ramArray = JCSystem.makeTransientByteArray((short) 260, JCSystem.CLEAR_ON_DESELECT);
             Util.arrayFillNonAtomic(m_ramArray, (short) 0, (short) 260, (byte) 0);
 
@@ -117,12 +117,12 @@ public class SimpleApplet extends javacard.framework.Applet
             m_random.generateData(m_ramArray, (short) 0, (short) (KeyBuilder.LENGTH_AES_256 / 8));
             m_aesKey.setKey(m_ramArray, (short) 0);
 
-            m_puk.update(buffer, dataOffset, PUK_LENGTH);
+            //m_puk.update(buffer, dataOffset, PUK_LENGTH);
 
             state = FACTORY;
-        } else {
+        /*} else {
             ISOException.throwIt(ISO7816.SW_WRONG_LENGTH);
-        }
+        }*/
         
         register();
     }

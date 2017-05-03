@@ -107,7 +107,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = 7673408373934859054L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            FileHelper.exportFile(JPassFrame.getInstance());
+            try {
+                FileHelper.exportFile(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -127,7 +131,12 @@ public enum MenuActionType {
         private static final long serialVersionUID = 616220526614500130L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            JPassFrame parent = JPassFrame.getInstance();
+            JPassFrame parent = null;
+            try {
+                parent = JPassFrame.getInstance();
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
             byte[] password = null;
             try {
                 password = MessageDialog.showPasswordDialog(parent, true);
@@ -150,7 +159,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = 2865402858056954304L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            new GeneratePasswordDialog(JPassFrame.getInstance());
+            try {
+                new GeneratePasswordDialog(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -158,7 +171,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = -2741659403416846295L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            JPassFrame.getInstance().exitFrame();
+            try {
+                JPassFrame.getInstance().exitFrame();
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -173,7 +190,11 @@ public enum MenuActionType {
             sb.append("\n");
             sb.append("Java version: ").append(System.getProperties().getProperty("java.version")).append("\n");
             sb.append(System.getProperties().getProperty("java.vendor"));
-            MessageDialog.showInformationMessage(JPassFrame.getInstance(), sb.toString());
+            try {
+                MessageDialog.showInformationMessage(JPassFrame.getInstance(), sb.toString());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -181,7 +202,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = 2476765521818491911L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            MessageDialog.showTextFile(JPassFrame.getInstance(), "License", "license.txt");
+            try {
+                MessageDialog.showTextFile(JPassFrame.getInstance(), "License", "license.txt");
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -189,7 +214,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = 6793989246928698613L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            EntryHelper.addEntry(JPassFrame.getInstance());
+            try {
+                EntryHelper.addEntry(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -197,7 +226,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = -3234220812811327191L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            EntryHelper.editEntry(JPassFrame.getInstance());
+            try {
+                EntryHelper.editEntry(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -205,7 +238,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = 6728896867346523861L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            EntryHelper.duplicateEntry(JPassFrame.getInstance());
+            try {
+                EntryHelper.duplicateEntry(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -213,7 +250,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = -1306116722130641659L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            EntryHelper.deleteEntry(JPassFrame.getInstance());
+            try {
+                EntryHelper.deleteEntry(JPassFrame.getInstance());
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -221,7 +262,12 @@ public enum MenuActionType {
         private static final long serialVersionUID = 3321559756310744862L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            JPassFrame parent = JPassFrame.getInstance();
+            JPassFrame parent = null;
+            try {
+                parent = JPassFrame.getInstance();
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
             Entry entry = EntryHelper.getSelectedEntry(parent);
             if (entry != null) {
                 EntryHelper.copyEntryField(parent, entry.getUrl());
@@ -233,7 +279,12 @@ public enum MenuActionType {
         private static final long serialVersionUID = -1126080607846730912L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            JPassFrame parent = JPassFrame.getInstance();
+            JPassFrame parent = null;
+            try {
+                parent = JPassFrame.getInstance();
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
             Entry entry = EntryHelper.getSelectedEntry(parent);
             if (entry != null) {
                 EntryHelper.copyEntryField(parent, entry.getUser());
@@ -245,7 +296,12 @@ public enum MenuActionType {
         private static final long serialVersionUID = 2719136744084762599L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            JPassFrame parent = JPassFrame.getInstance();
+            JPassFrame parent = null;
+            try {
+                parent = JPassFrame.getInstance();
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
             Entry entry = EntryHelper.getSelectedEntry(parent);
             if (entry != null) {
                 EntryHelper.copyEntryField(parent, entry.getPassword());
@@ -257,7 +313,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = -7621614933053924326L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            EntryHelper.copyEntryField(JPassFrame.getInstance(), null);
+            try {
+                EntryHelper.copyEntryField(JPassFrame.getInstance(), null);
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }),
 
@@ -265,7 +325,11 @@ public enum MenuActionType {
         private static final long serialVersionUID = -7621614933053924326L;
         @Override
         public void actionPerformed(ActionEvent ev) {
-            JPassFrame.getInstance().getSearchPanel().setVisible(true);
+            try {
+                JPassFrame.getInstance().getSearchPanel().setVisible(true);
+            } catch (Exception ex) {
+                Logger.getLogger(MenuActionType.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     });
 

@@ -36,6 +36,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -195,12 +197,16 @@ public class EntryDialog extends JDialog implements ActionListener {
             if (this.titleField.getText().trim().isEmpty()) {
                 MessageDialog.showWarningMessage(this, "Please fill the title field.");
                 return;
-            } else if (!checkEntryTitle()) {
-                MessageDialog.showWarningMessage(this, "Title is already exists,\nplease enter a different title.");
-                return;
-            } else if (!Arrays.equals(this.passwordField.getPassword(), this.repeatField.getPassword())) {
-                MessageDialog.showWarningMessage(this, "Password and repeated password are not identical.");
-                return;
+            } else try {
+                if (!checkEntryTitle()) {
+                    MessageDialog.showWarningMessage(this, "Title is already exists,\nplease enter a different title.");
+                    return;
+                } else if (!Arrays.equals(this.passwordField.getPassword(), this.repeatField.getPassword())) {
+                    MessageDialog.showWarningMessage(this, "Password and repeated password are not identical.");
+                    return;
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(EntryDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
             setFormData(fetchDialogData());
             dispose();
@@ -283,7 +289,7 @@ public class EntryDialog extends JDialog implements ActionListener {
      * @return if the entry title is already exists in the data model
      * than returns {@code false}, otherwise {@code true}
      */
-    private boolean checkEntryTitle() {
+    private boolean checkEntryTitle() throws Exception {
         boolean titleIsOk = true;
         JPassFrame parent = JPassFrame.getInstance();
         String currentTitleText = StringUtils.stripNonValidXMLCharacters(this.titleField.getText());
