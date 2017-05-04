@@ -18,12 +18,16 @@ public class MyAPDU {
     static CardMngr cardManager = new CardMngr();
     
     
-    public MyAPDU () throws Exception{            
+    public MyAPDU () throws Exception{
+        
+        // Initialize the connection with card
             if(cardManager.ConnectToCard()){
                 System.out.println("succ=> ConnectToCard");
             }
     }
     
+    
+    // get the encryption / decryption key stored in the JavaCard
     public String getKey() throws Exception{
         short additionalDataLen = 0;
             byte apdu[] = new byte[CardMngr.HEADER_LENGTH + additionalDataLen];
@@ -46,6 +50,8 @@ public class MyAPDU {
         return result;
     }
     
+    
+    // change the card Status to setup mode
     public int executeRun() throws Exception{
         // TODO: prepare proper APDU command
         short additionalDataLen = 0;
@@ -64,6 +70,8 @@ public class MyAPDU {
         return response.getSW();
     }
     
+    
+    // set the PIN Value, this function is called when the user forget the previous PIN and want to rerset it
     public int setPin(byte a, byte b, byte c, byte d) throws Exception{
         short additionalDataLen = 4;
         byte apdu[] = new byte[CardMngr.HEADER_LENGTH + additionalDataLen];
@@ -86,6 +94,7 @@ public class MyAPDU {
         return Integer.parseInt(bytesToHex(response.getBytes()));
     }
     
+    // verify if the PIN sent is correct
     public int verifyPin(int a, int b, int c, int d) throws Exception{
         short additionalDataLen = 4;
         byte apdu[] = new byte[CardMngr.HEADER_LENGTH + additionalDataLen];
@@ -109,36 +118,7 @@ public class MyAPDU {
         return Integer.parseInt(bytesToHex(response.getBytes()));
     }
     
-    
-    public int setPUK(byte[] array) throws Exception{
-        short additionalDataLen = 10;
-        byte apdu[] = new byte[CardMngr.HEADER_LENGTH + additionalDataLen];
-        apdu[CardMngr.OFFSET_CLA] = (byte) 0xB0;
-        apdu[CardMngr.OFFSET_INS] = (byte) 0x56;
-        apdu[CardMngr.OFFSET_P1] = (byte) 0x00;
-        apdu[CardMngr.OFFSET_P2] = (byte) 0x00;
-        apdu[CardMngr.OFFSET_LC] = (byte) additionalDataLen;
-
-        apdu[CardMngr.OFFSET_DATA] = array[0];
-        apdu[CardMngr.OFFSET_DATA+1] = array[1];
-        apdu[CardMngr.OFFSET_DATA+2] = array[2];
-        apdu[CardMngr.OFFSET_DATA+3] = array[3];
-        apdu[CardMngr.OFFSET_DATA+4] = array[4];
-        apdu[CardMngr.OFFSET_DATA+5] = array[5];
-        apdu[CardMngr.OFFSET_DATA+6] = array[6];
-        apdu[CardMngr.OFFSET_DATA+7] = array[7];
-        apdu[CardMngr.OFFSET_DATA+8] = array[8];
-        apdu[CardMngr.OFFSET_DATA+9] = array[9];
-        
-        ResponseAPDU response = cardManager.sendAPDU(apdu); 
-        String result = CardMngr.bytesToHex(response);
-
-        System.out.println("result of setPin=> "+result);
-        
-        return response.getSW();
-    }
-    
-    
+    // verify if the PUK sent is correct 
     public int verifyPuk(byte[] array) throws Exception{
         short additionalDataLen = 10;
         byte apdu[] = new byte[CardMngr.HEADER_LENGTH + additionalDataLen];

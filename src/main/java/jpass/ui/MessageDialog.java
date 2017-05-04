@@ -276,7 +276,7 @@ public final class MessageDialog extends JDialog implements ActionListener {
      */
     
     
-    private static int shoaPUKDialog(final Component parent) throws Exception{
+    private static int showPUKDialog(final Component parent) throws Exception{
         
         JPanel panel = new JPanel();
         panel.add(new JLabel("PUK:"));
@@ -332,7 +332,7 @@ public final class MessageDialog extends JDialog implements ActionListener {
         return notCorrect == false ? 9000 : -1;
     }
     
-    private static int shoaNewPinDialog(final Component parent) throws Exception{
+    private static int showNewPinDialog(final Component parent) throws Exception{
         
         JPanel panel = new JPanel();
         panel.add(new JLabel("Set New PIN:"));
@@ -428,10 +428,10 @@ public final class MessageDialog extends JDialog implements ActionListener {
                             break;
                         case SW_INVALID_OPERATION: // state != NORMAL
                             // the state should be failed, so we should ask for a PUK
-                            result = shoaPUKDialog(parent);
+                            result = showPUKDialog(parent);
                             
                             if (result == SW_SUCCESS) {// give the user a window to set a new PIN
-                                result = shoaNewPinDialog(parent);
+                                result = showNewPinDialog(parent);
                                 if(result == SW_SUCCESS){
                                     // do nothing, the user now can get the key
                                 }
