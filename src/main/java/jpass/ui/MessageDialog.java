@@ -43,6 +43,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,9 +84,30 @@ public final class MessageDialog extends JDialog implements ActionListener {
     public static final int NO_OPTION = 1;
     public static final int CANCEL_OPTION = 2;
     public static final int CLOSED_OPTION = -1;
-    private static MyAPDU m_apdu;
+    
 
     private int selectedOption;
+    
+    
+    private static MyAPDU m_apdu;
+    // INSTRUCTIONS
+    final static short INS_SENDKEY               = (byte) 0x50;
+    final static short INS_CHANGEKEY             = (byte) 0x51;
+    final static short INS_SETPIN                = (byte) 0x52;
+    final static short INS_VERIFYPIN             = (byte) 0x53;
+    final static short INS_VERIFYPUK             = (byte) 0x54;
+    final static short INS_RUN                   = (byte) 0x55;
+    final static short INS_SETPUK                = (byte) 0x56;
+
+    final static short SW_BAD_PARAMETER              = (short) 0x6710;
+    final static short SW_KEY_LENGTH_BAD             = (short) 0x6715;
+    final static short SW_INVALID_OPERATION          = (short) 6680;
+    final static short SW_BAD_PIN                    = (short) 0x6900;
+    final static short SW_BAD_PIN_LEN                = (short) 0x6910;
+    final static short SW_LOCKED                     = (short) 0x6920;
+    final static short SW_BAD_PUK                    = (short) 6950;
+    final static short SW_BAD_PUK_LEN                = (short) 0x6960;
+    final static short SW_SUCCESS                    = (short) 9000;
 
     private MessageDialog(final Dialog parent, final Object message, final String title, ImageIcon icon, int optionType) {
         super(parent);
@@ -252,7 +274,125 @@ public final class MessageDialog extends JDialog implements ActionListener {
      * @param confirm m_pin confirmation
      * @return the m_pin
      */
+    
+    
+    private static int shoaPUKDialog(final Component parent) throws Exception{
+        
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("PUK:"));
+        final JPasswordField m_puk = TextComponentFactory.newPasswordField();
+        panel.add(m_puk);
+
+        panel.setLayout(new SpringLayout());
+        SpringUtilities.makeCompactGrid(panel, false ? 2 : 1, 2, 5, 5, 5, 5);
+
+        boolean notCorrect = true;
+        
+        while (notCorrect) {
+            int option = showMessageDialog(parent, panel, "Enter PUK", getIcon("dialog_lock"), OK_CANCEL_OPTION);
+            if (option == OK_OPTION) {
+                System.out.println("PUK: "+m_puk.getPassword()[0]);
+                if (m_puk.getPassword().length != 10 || !isNumeric(m_puk.getPassword())) {
+                    showWarningMessage(parent, "Please enter a valid PUK.");
+                } else {
+                    // Now we are sure that we have a valid PUK of 10 digits, let's verify
+                    
+                    char[] puk_array = m_puk.getPassword();
+                    byte [] puk_byte_array = new String(puk_array).getBytes(StandardCharsets.UTF_8);
+                    int result = m_apdu.verifyPuk(puk_byte_array);
+                    
+                    System.out.println("result of verifyPuk ---=> "+result);
+                    
+                    switch (result) {
+                        case SW_SUCCESS:
+                                notCorrect = false;
+                                return result;
+                        case SW_BAD_PUK: // state != NORMAL
+                            // just do nothing and let the loop work !!    
+                            System.out.println("coucou---=> ");
+                            showWarningMessage(parent, "Bad PUK !!");
+                            break;
+                        case SW_INVALID_OPERATION: // The user didn't set the PIN correctly
+                                showWarningMessage(parent, "The card is locked, do something else in your life !!");
+                            break;
+                        default:
+                            break;
+                    }
+                    
+                    
+                    
+                    //notCorrect = false;
+                }
+            } else {
+                return -1;
+            }
+        }
+        
+        
+        return notCorrect == false ? 9000 : -1;
+    }
+    
+    private static int shoaNewPinDialog(final Component parent) throws Exception{
+        
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Set New PIN:"));
+        final JPasswordField m_pin = TextComponentFactory.newPasswordField();
+        panel.add(m_pin);
+
+        panel.setLayout(new SpringLayout());
+        SpringUtilities.makeCompactGrid(panel, false ? 2 : 1, 2, 5, 5, 5, 5);
+
+        boolean notCorrect = true;
+        
+        while (notCorrect) {
+            int option = showMessageDialog(parent, panel, "Enter New PIN", getIcon("dialog_lock"), OK_CANCEL_OPTION);
+            if (option == OK_OPTION) {
+                System.out.println("PIN: "+m_pin.getPassword()[0]);
+                if (m_pin.getPassword().length != 10 || !isNumeric(m_pin.getPassword())) {
+                    showWarningMessage(parent, "Please enter a valid PIN.");
+                } else {
+                    // Now we are sure that we have a valid PUK of 10 digits, let's verify
+                    
+                    char[] pin_array = m_pin.getPassword();
+                    byte [] pin_byte_array = new String(pin_array).getBytes(StandardCharsets.UTF_8);
+                    
+                    
+                    int result = m_apdu.setPin(pin_byte_array[0],  pin_byte_array[1], pin_byte_array[2], pin_byte_array[3]); // Change the card State to AUTHORIZED state
+                   System.out.println("result=> "+result);
+                    
+                    switch (result) {
+                        case SW_SUCCESS:
+                                notCorrect = false;
+                                return result;
+                        case SW_BAD_PIN: // state != NORMAL
+                            // just do nothing and let the loop work !!    
+                            
+                            break;
+                        case SW_INVALID_OPERATION: // The user didn't set the PIN correctly
+                                showWarningMessage(parent, "You can not change the PIN !!");
+                                return -1;
+                        default:
+                            break;
+                    }
+                    
+                    
+                    
+                    //notCorrect = false;
+                }
+            } else {
+                return -1;
+            }
+        }
+        
+        
+        return notCorrect == false ? 9000 : -1;
+    }
+    
+    
     public static byte[] showPasswordDialog(final Component parent, final boolean confirm) throws Exception {
+        // If every thing will be ok, the key will be stored in the "key" var
+        String key = "-1";
+        
         JPanel panel = new JPanel();
         panel.add(new JLabel("PIN:"));
         final JPasswordField m_pin = TextComponentFactory.newPasswordField();
@@ -276,69 +416,51 @@ public final class MessageDialog extends JDialog implements ActionListener {
                 } else if (confirm && !Arrays.equals(m_pin.getPassword(), repeat_pin.getPassword())) {
                     showWarningMessage(parent, "PIN and repeated PIN are not identical.");
                 } else {
-                    notCorrect = false;
+                    
+                    // Now we are sure that we have a valid PIN of 4 digits
+                    char[] pin_array = m_pin.getPassword();
+                    int result = m_apdu.verifyPin(Character.getNumericValue(pin_array[0]),  Character.getNumericValue(pin_array[1]), 
+                                                    Character.getNumericValue(pin_array[2]), Character.getNumericValue(pin_array[3])); // Change the card State to AUTHORIZED state
+                        System.out.println("result=> "+result);
+                    switch (result) {
+                        case SW_SUCCESS:
+                                notCorrect = false;
+                            break;
+                        case SW_INVALID_OPERATION: // state != NORMAL
+                            // the state should be failed, so we should ask for a PUK
+                            result = shoaPUKDialog(parent);
+                            
+                            if (result == SW_SUCCESS) {// give the user a window to set a new PIN
+                                result = shoaNewPinDialog(parent);
+                                if(result == SW_SUCCESS){
+                                    // do nothing, the user now can get the key
+                                }
+                                else {
+                                   return null; 
+                                }
+                            }
+                            else return null;
+                            
+                            break;
+                        case SW_BAD_PIN: // The user didn't set the PIN correctly
+                                showWarningMessage(parent, "bad PIN.");
+                            break;
+                        default:
+                            break;
+                    }
                 }
             } else {
                 return null;
             }
         }
-
-        // Now we are sure that we have a valid PIN of 4 digits
-        System.out.println("PIN: "+m_pin.getPassword()[0]);
-        
-        char[] pin_array = m_pin.getPassword();
         
         
-/*SIMULATION CODE--------------------------------------------------------------------******************/        
-       // m_apdu.executeRun(); // Change the card State to SETUP state
-        /*if (!confirm) {// new file
-            m_apdu.verifyPin((byte) pin_array[0], (byte) pin_array[1], 
-                (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to NORMAL state
-            }
-        else { // verify PIN
-            m_apdu.verifyPin((byte) pin_array[0], (byte) pin_array[1], 
-                (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to AUTHORIZED stat
-        }*/
-        
-       /* m_apdu.setPin((byte) pin_array[0], (byte) pin_array[1], 
-                (byte) pin_array[2], (byte) pin_array[3]); // Change the card State to NORMAL state
-        */
-       String key = "-1";
-       
-       
-       System.out.println("pin_array[0]=> "+Character.getNumericValue(pin_array[0]));
-       System.out.println("pin_araaray[0]=> "+pin_array[1]);
-       System.out.println("pin_array[0]=> "+pin_array[2]);
-       System.out.println("pin_arraaay[0]=> "+Character.getNumericValue(pin_array[3]));
-       
-       
-        int result = m_apdu.verifyPin(Character.getNumericValue(pin_array[0]),  Character.getNumericValue(pin_array[1]), 
-                Character.getNumericValue(pin_array[2]), Character.getNumericValue(pin_array[3])); // Change the card State to AUTHORIZED state
-        
-        switch (result) {
-          
-            case -1:
-                key = m_apdu.getKey();
-                if (key.equals("-1")) {
-                    showWarningMessage(parent, "bad PIN.");
-                }
-                break;
-            case -2:                
-                key = m_apdu.getKey();
-                if (key.equals("-1")) {
-                    showWarningMessage(parent, "invalid operation.");
-                }
-                break;
-            case -3:
-                showWarningMessage(parent, "Locked.");
-                break;
-            default:
-                break;
-        }
-        
+      // if we are here that means that we can get the key finally
+ 
         key = m_apdu.getKey();
         if (key.equals("-1")) {
             showWarningMessage(parent, "Error getting Key.");
+            return null; // stop encryt / descrypt operation
         }
         // here we get the pin, send it to the javacard, then receive the key and encrypt it, finally send it back
         byte[] passwordHash = null;
